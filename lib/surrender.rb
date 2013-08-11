@@ -25,6 +25,7 @@ module Surrender
 
     filenames.each do |filename|
       most_recent << filename
+
       if most_recent.size > options.fetch(:most_recent) then
         deleteable << most_recent.shift
       end
