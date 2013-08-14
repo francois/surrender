@@ -41,7 +41,7 @@ Anything that does not match the regular expression is reported as a warning on 
 STDOUT, implying the file must be kept.
 
 Incidentally, all parameters to surrender are optional. The default values are the ones expressed above.
-surrender uses a constant amount of memory, proportional to the sum of all parameters.
+surrender uses a constant amount of memory, related to the total number of files in the input stream.
 
 ## Contributing
 

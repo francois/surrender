@@ -16,30 +16,26 @@ module Surrender
     extra_keys = options.keys - DEFAULT_ARGUMENTS.keys
     raise ArgumentError, "Unknown keys: #{extra_keys.inspect} -- won't proceed" unless extra_keys.empty?
 
-    unprocessable = []
-    most_recent   = []
-    weekly        = Hash.new
+    policies = [
+      Surrender::MostRecentPolicy.new(options.fetch(:most_recent)),
+      Surrender::WeeklyPolicy.new(options.fetch(:weekly)),
+    ]
 
-    deleteable = filenames.each_with_object(Hash.new{|h,k| h[k] = Hash.new}) do |filename, votes|
-      next unprocessable << filename unless BACKUP_RE =~ filename
-
+    all_files = filenames.map(&:to_s)
+    valid_filenames = all_files.select{|fn| fn =~ BACKUP_RE}
+    unprocessable = all_files - valid_filenames
+    valid_filenames.each do |filename|
+      filename =~ BACKUP_RE
       date = Date.new($1.to_i, $3.to_i, $4.to_i)
 
-      most_recent << filename
-      votes[filename][:most_recent] = :keep
-      if most_recent.size > options.fetch(:most_recent) then
-        votes[most_recent.shift][:most_recent] = :delete
+      policies.each do |policy|
+        policy.add(filename, date)
       end
+    end
 
-      last_sunday = date - date.wday
-      if weekly.include?(last_sunday)
-        votes[weekly.delete(last_sunday)][:weekly] = :delete
-      end
-      weekly[last_sunday] = filename
-      votes[filename][:weekly] = :keep
-    end.select do |_, votes|
-      votes.values.uniq.size == 1 && votes.values.uniq.first == :delete
-    end.keys
+    deleteable = valid_filenames.select do |filename|
+      policies.all?{|policy| policy.deleteable?(filename)}
+    end
 
     [unprocessable, deleteable]
   end
