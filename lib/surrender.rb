@@ -3,6 +3,7 @@ require "surrender/most_recent_policy"
 require "surrender/weekly_policy"
 require "surrender/monthly_policy"
 require "surrender/yearly_policy"
+require "date"
 
 module Surrender
   DEFAULT_ARGUMENTS = {
