@@ -1,4 +1,8 @@
 require "surrender/version"
+require "surrender/most_recent_policy"
+require "surrender/weekly_policy"
+require "surrender/monthly_policy"
+require "surrender/yearly_policy"
 
 module Surrender
   DEFAULT_ARGUMENTS = {
@@ -19,6 +23,8 @@ module Surrender
     policies = [
       Surrender::MostRecentPolicy.new(options.fetch(:most_recent)),
       Surrender::WeeklyPolicy.new(options.fetch(:weekly)),
+      Surrender::MonthlyPolicy.new(options.fetch(:monthly)),
+      Surrender::YearlyPolicy.new(options.fetch(:yearly)),
     ]
 
     all_files = filenames.map(&:to_s)

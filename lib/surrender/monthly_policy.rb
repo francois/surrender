@@ -1,9 +1,9 @@
 require "surrender/bucket_policy"
 
 module Surrender
-  class WeeklyPolicy < BucketPolicy
+  class MonthlyPolicy < BucketPolicy
     def bucket(date)
-      date - date.wday
+      Date.new(date.year, date.month, 1)
     end
   end
 end
