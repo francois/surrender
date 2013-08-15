@@ -28,7 +28,7 @@ module Surrender
       Surrender::YearlyPolicy.new(options.fetch(:yearly)),
     ]
 
-    all_files = filenames.map(&:to_s)
+    all_files = filenames.map(&:to_s).map(&:chomp)
     valid_filenames = all_files.select{|fn| fn =~ BACKUP_RE}
     unprocessable = all_files - valid_filenames
     valid_filenames.each do |filename|

@@ -1,7 +1,5 @@
-2013-08-15 0.8.2
-================
-
 * Fix arguments passed on the command line would error out
+* Fix newline on filenames when reading from ARGF
 
 
 2013-08-15 0.8.1
