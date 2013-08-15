@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 require "surrender"
 
-options = ARGV.each_with_object(Surrender::DEFAULT_ARGUMENTS) do |arg, memo|
+options = ARGV.each_with_object(Surrender::DEFAULT_ARGUMENTS.dup) do |arg, memo|
   case arg
   when /^--most-recent=(\d+)$/
     memo[:most_recent] = Integer($1)
@@ -11,8 +11,12 @@ options = ARGV.each_with_object(Surrender::DEFAULT_ARGUMENTS) do |arg, memo|
     memo[:monthly] = Integer($1)
   when /^--yearly=(\d+)$/
     memo[:yearly] = Integer($1)
+  else
+    raise ArgumentError, "Unknown option #{arg.inspect}"
   end
 end
+
+ARGV.select{|arg| arg[0, 2] == "--"}.each{|arg| ARGV.delete(arg)}
 
 unprocessable, deleteable = Surrender.reject(ARGF, options)
 STDERR.puts unprocessable.map{|filename| "WARN: Filename #{filename.inspect} did not match the filter expression"}
