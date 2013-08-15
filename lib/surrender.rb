@@ -9,7 +9,7 @@ module Surrender
   DEFAULT_ARGUMENTS = {
     most_recent: 7,
     weekly: 5,
-    monthly: 2,
+    monthly: 12,
     yearly: 2
   }.freeze
 

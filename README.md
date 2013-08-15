@@ -22,12 +22,14 @@ Or install it yourself as:
 
 Acts as a filter, returning files which should be removed from a backup scheme:
 
-    $ find /var/backup/database -type f | sort | surrender --minimum-files=7 --most-recent=2 --weekly=2 --monthly=12 --yearly=2 | xargs rm
+    $ find /var/backup/database -type f | sort | surrender --most-recent=7 --weekly=5 --monthly=12 --yearly=2 | xargs rm
 
-Would keep at a minimum 4 files, but only 2 weekly (the 2 most recent weekly backups),
-the 12 most recent monthly backups and the 2 most recent yearly backups. Backup dates
-are determined from the file's path, which must match the following regular
-expression: `/\b(?:19|2\d)\d{2}(.)?(?:0\d|1[012])\1(?:[012]\d|3[01])(?:T|\b)`.
+Would keep the most recent 7 files, irrespective of their dates, the 5 most recent
+weekly backups, the 12 most recent monthly backups, and the 2 most recent yearly
+backups. Backup dates are determined from the file's path, which must match the
+following regular expression:
+
+    /\b((?:19|2\d)\d{2})(.)?(0\d|1[012])\2?([012]\d|3[01])(?:T|\b)/
 
 This regular expression matches schemes like this:
 
@@ -36,8 +38,6 @@ This regular expression matches schemes like this:
 * /var/backup/database/contacts/2013/08/11.sql.gz
 
 which seems to be common enough.
-
-No attempt is made to validate the date: 2013-02-31 is a perfectly valid date for surrender.
 
 Anything that does not match the regular expression is reported as a warning on STDERR, and filtered from
 STDOUT, implying the file must be kept.
