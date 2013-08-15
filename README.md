@@ -1,5 +1,7 @@
 # Surrender
 
+[![Build Status](https://travis-ci.org/francois/surrender.png?branch=master)](https://travis-ci.org/francois/surrender)
+
 Returns the list of files which should be surrendered to the ether.
 
 ## Installation
