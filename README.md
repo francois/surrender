@@ -71,6 +71,18 @@ policies, while `backup.2013-12-14.tar.gz` was voted to be kept by the most rece
 
 The `--verbose` flag outputs to STDERR, keeping STDOUT clean.
 
+## Common pipelines
+
+### Clean up your Amazon S3 bucket
+
+    $ s3cmd ls s3://mybucket | awk '{ print $NF }' | surrender | xargs s3cmd del
+
+First, we list the contents of `mybucket`. After that, we extract just our file's name from the list.
+Next we surrender any names which should be deleted, and pass each line to `s3cmd del`, which results
+in a certain number of files being deleted. `s3cmd` will be called once per line of the input. In the
+normal case, you should not be deleting many files at once, and there should not be any performance
+problems.
+
 ## Contributing
 
 1. Fork it
