@@ -11,6 +11,7 @@ Gem::Specification.new do |gem|
   gem.description   = %q{Given a list of files on STDIN, returns on STDOUT the list of files that should be rm'd - namely the list of files which don't match the retain rules.}
   gem.summary       = %q{Acts as a filter, returning the list of files that don't match the retain rules}
   gem.homepage      = "https://github.com/francois/surrender"
+  gem.license       = 'MIT'
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
