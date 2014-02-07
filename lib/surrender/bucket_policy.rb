@@ -7,6 +7,10 @@ module Surrender
 
     attr_reader :count, :memo
 
+    def name
+      self.class.name.sub("Policy", "").sub("Surrender::", "").downcase
+    end
+
     def add(filename, date)
       memo[bucket(date)] = filename
       memo.delete(memo.keys.first) if memo.size > count

@@ -7,6 +7,10 @@ module Surrender
 
     attr_reader :count, :memo
 
+    def name
+      "most recent"
+    end
+
     def add(filename, _)
       memo << filename
       memo.shift if memo.size > count

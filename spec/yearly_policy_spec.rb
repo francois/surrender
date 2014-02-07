@@ -5,6 +5,8 @@ describe Surrender::YearlyPolicy do
   context "when count = 2" do
     subject { Surrender::YearlyPolicy.new(2) }
 
+    it { subject.name.should == "yearly" }
+
     it "keeps the most recent filename of the last two years" do
       subject.add "a", Date.new(2011,  8, 9)
       subject.add "b", Date.new(2011,  9, 9)

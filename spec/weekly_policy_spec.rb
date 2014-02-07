@@ -5,6 +5,8 @@ describe Surrender::WeeklyPolicy do
   context "when count = 1" do
     subject { Surrender::WeeklyPolicy.new(1) }
 
+    it { subject.name.should == "weekly" }
+
     it "keeps the last filename per week" do
       subject.add "a", Date.new(2013, 8, 4)
       subject.deleteable?("a").should == false

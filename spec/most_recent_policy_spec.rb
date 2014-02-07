@@ -5,6 +5,8 @@ describe Surrender::MostRecentPolicy do
   context "when count = 1" do
     subject { Surrender::MostRecentPolicy.new(1) }
 
+    it { subject.name.should == "most recent" }
+
     it "keeps the last entry only" do
       filename1 = "/var/backups/20130801.sql.gz"
       subject.add filename1, Date.new(2013, 8, 1)

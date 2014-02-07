@@ -11,6 +11,8 @@ options = ARGV.each_with_object(Surrender::DEFAULT_ARGUMENTS.dup) do |arg, memo|
     memo[:monthly] = Integer($1)
   when /^--yearly=(\d+)$/
     memo[:yearly] = Integer($1)
+  when /^--verbose$/
+    memo[:verbose] = true
   else
     raise ArgumentError, "Unknown option #{arg.inspect}"
   end

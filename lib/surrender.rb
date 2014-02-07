@@ -7,6 +7,7 @@ require "date"
 
 module Surrender
   DEFAULT_ARGUMENTS = {
+    verbose: false,
     most_recent: 7,
     weekly: 5,
     monthly: 12,
@@ -20,6 +21,8 @@ module Surrender
     options = DEFAULT_ARGUMENTS.merge(options)
     extra_keys = options.keys - DEFAULT_ARGUMENTS.keys
     raise ArgumentError, "Unknown keys: #{extra_keys.inspect} -- won't proceed" unless extra_keys.empty?
+
+    verbose = options[:verbose]
 
     policies = [
       Surrender::MostRecentPolicy.new(options.fetch(:most_recent)),
@@ -41,6 +44,13 @@ module Surrender
     end
 
     deleteable = valid_filenames.select do |filename|
+      if verbose then
+        message = policies.map do |policy|
+          "#{policy.name}=#{policy.deleteable?(filename) ? "delete" : "keep"}"
+        end.join(", ")
+        STDERR.puts "#{filename.inspect}: #{message}"
+      end
+
       policies.all?{|policy| policy.deleteable?(filename)}
     end
 

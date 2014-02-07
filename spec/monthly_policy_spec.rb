@@ -5,6 +5,8 @@ describe Surrender::MonthlyPolicy do
   context "when count = 3" do
     subject { Surrender::MonthlyPolicy.new(3) }
 
+    it { subject.name.should == "monthly" }
+
     it "keeps the latest backup of the last three months" do
       subject.add "a", Date.new(2013, 3, 1)
       subject.add "b", Date.new(2013, 3, 15)

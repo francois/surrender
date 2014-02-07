@@ -22,7 +22,7 @@ Or install it yourself as:
 
 Acts as a filter, returning files which should be removed from a backup scheme:
 
-    $ find /var/backup/database -type f | sort | surrender --most-recent=7 --weekly=5 --monthly=12 --yearly=2 | xargs rm
+    $ find /var/backup/database -type f | sort | surrender --most-recent=7 --weekly=5 --monthly=12 --yearly=2 | xargs rm --verbose
 
 Would keep the most recent 7 files, irrespective of their dates, the 5 most recent
 weekly backups, the 12 most recent monthly backups, and the 2 most recent yearly
@@ -44,6 +44,32 @@ STDOUT, implying the file must be kept.
 
 Incidentally, all parameters to surrender are optional. The default values are the ones expressed above.
 surrender uses a constant amount of memory, related to the total number of files in the input stream.
+
+## Viewing the inner workings
+
+If you pass the `--verbose` option, Surrender will tell you how it arrived at it's decision:
+
+    $ for DATE in 2013-12-{10..20} ; do echo "backup.${DATE}.tar.gz" ; done | RUBYOPT=-Ilib bin/surrender --verbose
+    "backup.2013-12-10.tar.gz": most recent=delete, weekly=delete, monthly=delete, yearly=delete
+    "backup.2013-12-11.tar.gz": most recent=delete, weekly=delete, monthly=delete, yearly=delete
+    "backup.2013-12-12.tar.gz": most recent=delete, weekly=delete, monthly=delete, yearly=delete
+    "backup.2013-12-13.tar.gz": most recent=delete, weekly=delete, monthly=delete, yearly=delete
+    "backup.2013-12-14.tar.gz": most recent=keep, weekly=keep, monthly=delete, yearly=delete
+    "backup.2013-12-15.tar.gz": most recent=keep, weekly=delete, monthly=delete, yearly=delete
+    "backup.2013-12-16.tar.gz": most recent=keep, weekly=delete, monthly=delete, yearly=delete
+    "backup.2013-12-17.tar.gz": most recent=keep, weekly=delete, monthly=delete, yearly=delete
+    "backup.2013-12-18.tar.gz": most recent=keep, weekly=delete, monthly=delete, yearly=delete
+    "backup.2013-12-19.tar.gz": most recent=keep, weekly=delete, monthly=delete, yearly=delete
+    "backup.2013-12-20.tar.gz": most recent=keep, weekly=keep, monthly=keep, yearly=keep
+    backup.2013-12-10.tar.gz
+    backup.2013-12-11.tar.gz
+    backup.2013-12-12.tar.gz
+    backup.2013-12-13.tar.gz
+
+In this example, you can see that the `backup.2013-12-10.tar.gz` file was voted to be deleted by all
+policies, while `backup.2013-12-14.tar.gz` was voted to be kept by the most recent and weekly policies.
+
+The `--verbose` flag outputs to STDERR, keeping STDOUT clean.
 
 ## Contributing
 
