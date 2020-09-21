@@ -9,36 +9,24 @@ import (
 	"time"
 )
 
-type MostRecentVoter struct {
-	Dates map[time.Time]int
-}
-
-type DailyVoter struct {
-	Dates map[time.Time]int
-}
-
-type WeeklyVoter struct {
-	Dates map[time.Time]int
-}
-
-type MonthlyVoter struct {
+type VoterMemory struct {
 	Dates map[time.Time]int
 }
 
 // Returns true to keep, false to delete
-func voteMostRecent(date time.Time, voter *MostRecentVoter) bool {
+func voteMostRecent(date time.Time, voter *VoterMemory) bool {
 	voter.Dates[time.Unix(0, 0)] += 1
 	return voter.Dates[time.Unix(0, 0)] <= 5
 }
 
 // Returns true to keep, false to delete
-func voteDaily(date time.Time, voter *DailyVoter) bool {
+func voteDaily(date time.Time, voter *VoterMemory) bool {
 	voter.Dates[date] += 1
 	return voter.Dates[date] <= 1
 }
 
 // Returns true to keep, false to delete
-func voteWeekly(date time.Time, voter *WeeklyVoter) bool {
+func voteWeekly(date time.Time, voter *VoterMemory) bool {
 	for date.Weekday() != time.Sunday {
 		date = date.AddDate(0, 0, -1)
 	}
@@ -48,7 +36,7 @@ func voteWeekly(date time.Time, voter *WeeklyVoter) bool {
 }
 
 // Returns true to keep, false to delete
-func voteMonthly(date time.Time, voter *MonthlyVoter) bool {
+func voteMonthly(date time.Time, voter *VoterMemory) bool {
 	date = date.AddDate(0, 0, -1*date.Day()+1)
 
 	voter.Dates[date] += 1
@@ -59,10 +47,10 @@ func main() {
 	re := regexp.MustCompile("\\b(19|2\\d\\d{2})[-._/]?(0[1-9]|1[012])[-._/]?(0[1-9]|[12][0-9]|3[01])")
 	location, _ := time.LoadLocation("Local")
 
-	voter0 := MostRecentVoter{make(map[time.Time]int)}
-	voter1 := DailyVoter{make(map[time.Time]int)}
-	voter2 := WeeklyVoter{make(map[time.Time]int)}
-	voter3 := MonthlyVoter{make(map[time.Time]int)}
+	voter0 := VoterMemory{make(map[time.Time]int)}
+	voter1 := VoterMemory{make(map[time.Time]int)}
+	voter2 := VoterMemory{make(map[time.Time]int)}
+	voter3 := VoterMemory{make(map[time.Time]int)}
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
