@@ -10,46 +10,55 @@ import (
 	"time"
 )
 
+const keep = "keep"
+const discard = "discard"
+
 type VoterMemory struct {
 	Dates map[time.Time]int
 }
 
-// Returns true to keep, false to delete
-func voteMostRecent(date time.Time, voter *VoterMemory) bool {
+func vote(date time.Time, threshold int, voter *VoterMemory) string {
+	if voter.Dates[date] > 0 || len(voter.Dates) >= threshold {
+		return discard
+	} else {
+		voter.Dates[date] += 1
+		if voter.Dates[date] > 1 {
+			panic("There should only be one keep per date")
+		}
+
+		return keep
+	}
+}
+
+func voteMostRecent(date time.Time, voter *VoterMemory) string {
 	voter.Dates[time.Unix(0, 0)] += 1
-	return voter.Dates[time.Unix(0, 0)] <= keepMostRecent
+	if voter.Dates[time.Unix(0, 0)] <= keepMostRecent {
+		return keep
+	} else {
+		return discard
+	}
 }
 
-// Returns true to keep, false to delete
-func voteDaily(date time.Time, voter *VoterMemory) bool {
-	voter.Dates[date] += 1
-	return voter.Dates[date] <= keepDaily
+func voteDaily(date time.Time, voter *VoterMemory) string {
+	return vote(date, keepDaily, voter)
 }
 
-// Returns true to keep, false to delete
-func voteWeekly(date time.Time, voter *VoterMemory) bool {
+func voteWeekly(date time.Time, voter *VoterMemory) string {
 	for date.Weekday() != time.Sunday {
 		date = date.AddDate(0, 0, -1)
 	}
 
-	voter.Dates[date] += 1
-	return voter.Dates[date] <= keepWeekly
+	return vote(date, keepWeekly, voter)
 }
 
-// Returns true to keep, false to delete
-func voteMonthly(date time.Time, voter *VoterMemory) bool {
+func voteMonthly(date time.Time, voter *VoterMemory) string {
 	date = date.AddDate(0, 0, -1*date.Day()+1)
-
-	voter.Dates[date] += 1
-	return voter.Dates[date] <= keepMonthly
+	return vote(date, keepMonthly, voter)
 }
 
-// Returns true to keep, false to delete
-func voteYearly(date time.Time, voter *VoterMemory) bool {
+func voteYearly(date time.Time, voter *VoterMemory) string {
 	date = date.AddDate(0, 0, -1*date.YearDay()+1)
-
-	voter.Dates[date] += 1
-	return voter.Dates[date] <= keepYearly
+	return vote(date, keepYearly, voter)
 }
 
 func teaseDateFromString(text string) time.Time {
@@ -115,11 +124,11 @@ var location *time.Location
 func main() {
 	help := flag.Bool("help", false, "Show this help message")
 	flag.BoolVar(&verbose, "verbose", false, "Returns, on STDERR, the decision tree for each input line")
-	flag.IntVar(&keepMostRecent, "most-recent", 7, "Keeps a minimum of N most recent files")
-	flag.IntVar(&keepDaily, "daily", 7, "Keeps the most recent N daily backups")
-	flag.IntVar(&keepWeekly, "weekly", 4, "Keeps the most recent N weekly backups, where a week starts on Sunday")
-	flag.IntVar(&keepMonthly, "monthly", 12, "Keeps the most recent N monthly backups")
-	flag.IntVar(&keepYearly, "yearly", 2, "Keeps the most recent N yearly backups")
+	flag.IntVar(&keepMostRecent, "most-recent", 7, "keeps a minimum of N most recent files")
+	flag.IntVar(&keepDaily, "daily", 7, "keeps the most recent N daily backups")
+	flag.IntVar(&keepWeekly, "weekly", 4, "keeps the most recent N weekly backups, where a week starts on Sunday")
+	flag.IntVar(&keepMonthly, "monthly", 12, "keeps the most recent N monthly backups")
+	flag.IntVar(&keepYearly, "yearly", 2, "keeps the most recent N yearly backups")
 	flag.Parse()
 
 	if *help {
@@ -147,7 +156,7 @@ func main() {
 		result3 := voteMonthly(date, &voter3)
 		result4 := voteYearly(date, &voter4)
 		if verbose {
-			fmt.Fprintf(os.Stderr, "%s => recent %t, daily %t, weekly %t, monthly %t, yearly %t\n",
+			fmt.Fprintf(os.Stderr, "%s\t=>\trecent %s\tdaily %s\tweekly %s\tmonthly %s\tyearly %s\n",
 				scanner.Text(),
 				result0,
 				result1,
@@ -156,9 +165,8 @@ func main() {
 				result4,
 			)
 		}
-		if result0 || result1 || result2 || result3 || result4 {
-			// NO OP: keep
-		} else {
+
+		if result0 == discard && result1 == discard && result2 == discard && result3 == discard && result4 == discard {
 			fmt.Println(scanner.Text())
 		}
 	}

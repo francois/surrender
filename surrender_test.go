@@ -6,6 +6,34 @@ import (
 	"time"
 )
 
+func TestVote(t *testing.T) {
+	location, _ := time.LoadLocation("Local")
+	threshold := 3
+	memory := VoterMemory{make(map[time.Time]int)}
+
+	tables := []struct {
+		have time.Time
+		want string
+	}{
+		{time.Date(2020, time.January, 9, 0, 0, 0, 0, location), keep},
+		{time.Date(2020, time.January, 9, 0, 0, 0, 0, location), discard},
+		{time.Date(2020, time.January, 8, 0, 0, 0, 0, location), keep},
+		{time.Date(2020, time.January, 8, 0, 0, 0, 0, location), discard},
+		{time.Date(2020, time.January, 8, 0, 0, 0, 0, location), discard},
+		{time.Date(2020, time.January, 7, 0, 0, 0, 0, location), keep},
+		{time.Date(2020, time.January, 7, 0, 0, 0, 0, location), discard},
+		{time.Date(2020, time.January, 6, 0, 0, 0, 0, location), discard},
+		{time.Date(2020, time.January, 6, 0, 0, 0, 0, location), discard},
+		{time.Date(2020, time.January, 5, 0, 0, 0, 0, location), discard},
+	}
+
+	for idx, table := range tables {
+		if result := vote(table.have, threshold, &memory); result != table.want {
+			t.Errorf("have %s, want %s, got %s at %d\nstate\n%v", table.have, table.want, result, idx, memory)
+		}
+	}
+}
+
 func TestRegexpUnderstanding(t *testing.T) {
 	re := regexp.MustCompile("\\b((?:19|[2-9]\\d)\\d{2})[-_./]?(0[1-9]|1[012])[-_./]?(0[1-9]|[12][0-9]|3[01])")
 	tables := []struct {
