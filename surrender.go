@@ -142,12 +142,20 @@ func main() {
 	voter3 := VoterMemory{make(map[time.Time]int)}
 	voter4 := VoterMemory{make(map[time.Time]int)}
 
+	lastSeenDate := time.Now().AddDate(999, 0, 0)
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		date := teaseDateFromString(scanner.Text())
 		if date == time.Unix(0, 0) {
 			fmt.Fprintf(os.Stderr, "\"%s\": failed to discover YYYY-MM-DD within the filename\n", scanner.Text())
 			continue
+		}
+
+		if date.After(lastSeenDate) {
+			fmt.Fprintf(os.Stderr, "last = %v, date = %v\n", lastSeenDate, date)
+			panic("Input must be reverse sorted list of dates; found an earlier date")
+		} else {
+			lastSeenDate = date
 		}
 
 		result0 := voteMostRecent(date, &voter0)
