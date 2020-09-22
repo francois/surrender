@@ -53,7 +53,19 @@ func voteYearly(date time.Time, voter *VoterMemory) bool {
 }
 
 func teaseDateFromString(text string) time.Time {
+	if re == nil {
+		re = regexp.MustCompile("\\b((?:19|[2-9]\\d)\\d{2})[-_./]?(0[1-9]|1[012])[-_./]?(0[1-9]|[12][0-9]|3[01])")
+	}
+
+	if location == nil {
+		location, _ = time.LoadLocation("Local")
+	}
+
 	matches := re.FindStringSubmatch(text)
+	if matches == nil {
+		return time.Unix(0, 0)
+	}
+
 	year, _ := strconv.ParseInt(matches[1], 10, 32)
 	monthnum, _ := strconv.ParseInt(matches[2], 10, 32)
 	day, _ := strconv.ParseInt(matches[3], 10, 32)
@@ -115,9 +127,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	re = regexp.MustCompile("\\b((?:19|[2-9]\\d)\\d{2})[-._/]?(0[1-9]|1[012])[-._/]?(0[1-9]|[12][0-9]|3[01])(?:\b|T)")
-	location, _ = time.LoadLocation("Local")
-
 	voter0 := VoterMemory{make(map[time.Time]int)}
 	voter1 := VoterMemory{make(map[time.Time]int)}
 	voter2 := VoterMemory{make(map[time.Time]int)}
@@ -127,6 +136,10 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		date := teaseDateFromString(scanner.Text())
+		if date == time.Unix(0, 0) {
+			fmt.Fprintf(os.Stderr, "\"%s\": failed to discover YYYY-MM-DD within the filename\n", scanner.Text())
+			continue
+		}
 
 		result0 := voteMostRecent(date, &voter0)
 		result1 := voteDaily(date, &voter1)
