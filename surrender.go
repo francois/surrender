@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"os"
 	"regexp"
@@ -16,13 +17,13 @@ type VoterMemory struct {
 // Returns true to keep, false to delete
 func voteMostRecent(date time.Time, voter *VoterMemory) bool {
 	voter.Dates[time.Unix(0, 0)] += 1
-	return voter.Dates[time.Unix(0, 0)] <= 5
+	return voter.Dates[time.Unix(0, 0)] <= keepMostRecent
 }
 
 // Returns true to keep, false to delete
 func voteDaily(date time.Time, voter *VoterMemory) bool {
 	voter.Dates[date] += 1
-	return voter.Dates[date] <= 1
+	return voter.Dates[date] <= keepDaily
 }
 
 // Returns true to keep, false to delete
@@ -32,7 +33,7 @@ func voteWeekly(date time.Time, voter *VoterMemory) bool {
 	}
 
 	voter.Dates[date] += 1
-	return voter.Dates[date] <= 1
+	return voter.Dates[date] <= keepWeekly
 }
 
 // Returns true to keep, false to delete
@@ -40,7 +41,7 @@ func voteMonthly(date time.Time, voter *VoterMemory) bool {
 	date = date.AddDate(0, 0, -1*date.Day()+1)
 
 	voter.Dates[date] += 1
-	return voter.Dates[date] <= 1
+	return voter.Dates[date] <= keepMonthly
 }
 
 // Returns true to keep, false to delete
@@ -48,7 +49,7 @@ func voteYearly(date time.Time, voter *VoterMemory) bool {
 	date = date.AddDate(0, 0, -1*date.YearDay()+1)
 
 	voter.Dates[date] += 1
-	return voter.Dates[date] <= 1
+	return voter.Dates[date] <= keepYearly
 }
 
 func teaseDateFromString(text string) time.Time {
@@ -88,12 +89,32 @@ func teaseDateFromString(text string) time.Time {
 	return time.Date(int(year), month, int(day), 0, 0, 0, 0, location)
 }
 
+// Command-line options
 var verbose bool
+var keepMostRecent int
+var keepDaily int
+var keepWeekly int
+var keepMonthly int
+var keepYearly int
+
 var re *regexp.Regexp
 var location *time.Location
 
 func main() {
-	verbose = true
+	help := flag.Bool("help", false, "Show this help message")
+	flag.BoolVar(&verbose, "verbose", false, "Returns, on STDERR, the decision tree for each input line")
+	flag.IntVar(&keepMostRecent, "most-recent", 7, "Keeps a minimum of N most recent files")
+	flag.IntVar(&keepDaily, "daily", 7, "Keeps the most recent N daily backups")
+	flag.IntVar(&keepWeekly, "weekly", 4, "Keeps the most recent N weekly backups, where a week starts on Sunday")
+	flag.IntVar(&keepMonthly, "monthly", 12, "Keeps the most recent N monthly backups")
+	flag.IntVar(&keepYearly, "yearly", 2, "Keeps the most recent N yearly backups")
+	flag.Parse()
+
+	if *help {
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
+
 	re = regexp.MustCompile("\\b((?:19|[2-9]\\d)\\d{2})[-._/]?(0[1-9]|1[012])[-._/]?(0[1-9]|[12][0-9]|3[01])(?:\b|T)")
 	location, _ = time.LoadLocation("Local")
 
